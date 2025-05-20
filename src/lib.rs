@@ -12,17 +12,16 @@ use system::{
     param::{SystemParam, query::Query, query_mut::QueryMut, res::Res, res_mut::ResMut},
 };
 
-pub mod entity;
 pub mod prelude;
 pub mod states;
 pub mod system;
 
-pub struct Engine<T> {
-    systems: Vec<Box<dyn System<T>>>,
+pub struct Engine {
+    systems: Vec<Box<dyn System<()>>>,
     pub(crate) storage: EntityStateStorage,
 }
 
-impl<T> Default for Engine<T> {
+impl Default for Engine {
     fn default() -> Self {
         Self {
             systems: vec![],
@@ -31,41 +30,34 @@ impl<T> Default for Engine<T> {
     }
 }
 
-impl<T> Deref for Engine<T> {
+impl Deref for Engine {
     type Target = EntityStateStorage;
     fn deref(&self) -> &Self::Target {
         &self.storage
     }
 }
 
-impl<T> DerefMut for Engine<T> {
+impl DerefMut for Engine {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.storage
     }
 }
 
-impl<T> Engine<T> {
+impl Engine {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn oneshot_system(&mut self, mut system: impl System<T>) -> T {
+    pub fn oneshot_system<T>(&mut self, mut system: impl System<T>) -> T {
         system.call(&mut self.storage)
     }
 
-    pub fn non_auto_system<S: System<T> + 'static>(&mut self, system: S) -> &mut Self {
+    pub fn system<S: System<()> + 'static>(&mut self, system: S) -> &mut Self {
         self.systems.push(Box::new(system));
         self
     }
 
-    pub fn system<I, A, S: System<T> + 'static, M: IntoSystem<T, I, A, System = S> + 'static>(
-        &mut self,
-        system: M,
-    ) -> &mut Self {
-        self.non_auto_system(system.into_system())
-    }
-
-    pub fn systems<I, A>(&mut self, systems: impl IntoSystemSet<T, I, A>) -> &mut Self {
+    pub fn systems<I, A>(&mut self, systems: impl IntoSystemSet<(), I, A>) -> &mut Self {
         for system in systems.into_widget_set() {
             self.systems.push(system);
         }

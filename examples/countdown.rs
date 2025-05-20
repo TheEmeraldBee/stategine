@@ -19,9 +19,9 @@ fn change_state(mut running_state: ResMut<RunningCounter>) {
 
 fn main() {
     let mut engine = Engine::new();
-    engine.system(change_state);
-    engine.state(RunningCounter(8));
-    engine.non_auto_system(ConditionalSystemSet::new(render_check, (render,)));
+    engine.state(RunningCounter(10));
+    engine.system(ConditionalSystemSet::new(render_check, (render,)));
+    engine.systems((change_state,));
 
     engine.entity(5).entity(10);
 

@@ -1,5 +1,8 @@
 test:
 	cargo test
 
-wait_for_input_example:
-	cargo run --example wait_for_input
+ascii-forge-example:
+	cargo run --example ascii-forge
+
+countdown-example:
+	cargo run --example countdown
