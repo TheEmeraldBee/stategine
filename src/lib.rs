@@ -7,7 +7,6 @@ use std::{
 use states::{MultiInsertStates, States};
 use system::{
     System,
-    into_system::IntoSystem,
     into_system_set::IntoSystemSet,
     param::{SystemParam, query::Query, query_mut::QueryMut, res::Res, res_mut::ResMut},
 };
@@ -16,18 +15,10 @@ pub mod prelude;
 pub mod states;
 pub mod system;
 
+#[derive(Default)]
 pub struct Engine {
     systems: Vec<Box<dyn System<()>>>,
     pub(crate) storage: EntityStateStorage,
-}
-
-impl Default for Engine {
-    fn default() -> Self {
-        Self {
-            systems: vec![],
-            storage: EntityStateStorage::default(),
-        }
-    }
 }
 
 impl Deref for Engine {

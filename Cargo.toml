@@ -1,11 +1,14 @@
 [package]
 name = "stategine"
-version = "0.1.0"
+version="0.0.0"
 edition = "2024"
 description = "An application engine for handling function systems that run based on states and conditions"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/TheEmeraldBee/stategine"
 
 [dependencies]
-downcast-rs = "2.0.1"
 
 [dev-dependencies]
 ascii-forge = "1.1.1"
+ratatui = "0.29.0"
