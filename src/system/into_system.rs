@@ -5,5 +5,5 @@ use crate::system::System;
 pub trait IntoSystem<T, Input, Data> {
     type System: System<T>;
 
-    fn into_widget(self) -> Self::System;
+    fn into_system(self) -> Self::System;
 }

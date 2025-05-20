@@ -15,7 +15,7 @@ pub struct Query<'a, T: 'static> {
 }
 
 impl<'a, T: 'static> Query<'a, T> {
-    pub fn get<'b>(&'b self, idx: usize) -> Option<&'b T> {
+    pub fn get(&self, idx: usize) -> Option<&T> {
         self.value.get(idx).map(|x| x.downcast_ref().unwrap())
     }
 
@@ -32,7 +32,7 @@ pub struct QueryIter<'a, 'b, T: 'static> {
     item: usize,
 }
 
-impl<'a, 'b, T: 'static> Iterator for QueryIter<'a, 'b, T> {
+impl<'b, T: 'static> Iterator for QueryIter<'_, 'b, T> {
     type Item = &'b T;
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.query.get(self.item);
@@ -41,7 +41,7 @@ impl<'a, 'b, T: 'static> Iterator for QueryIter<'a, 'b, T> {
     }
 }
 
-impl<'a, T: 'static> SystemParam for Query<'_, T> {
+impl<T: 'static> SystemParam for Query<'_, T> {
     type Item<'new> = Query<'new, T>;
 
     fn retrieve(resources: &EntityStateStorage) -> Self::Item<'_> {

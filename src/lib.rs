@@ -6,13 +6,14 @@ use std::{
 
 use states::{MultiInsertStates, States};
 use system::{
-    System, SystemResult,
+    System,
     into_system::IntoSystem,
     into_system_set::IntoSystemSet,
     param::{SystemParam, query::Query, query_mut::QueryMut, res::Res, res_mut::ResMut},
 };
 
 pub mod entity;
+pub mod prelude;
 pub mod states;
 pub mod system;
 
@@ -48,13 +49,20 @@ impl<T> Engine<T> {
         Self::default()
     }
 
-    pub fn oneshot_system(&mut self, mut system: impl System<T>) -> SystemResult<T> {
+    pub fn oneshot_system(&mut self, mut system: impl System<T>) -> T {
         system.call(&mut self.storage)
     }
 
-    pub fn system(&mut self, system: impl System<T> + 'static) -> &mut Self {
+    pub fn non_auto_system<S: System<T> + 'static>(&mut self, system: S) -> &mut Self {
         self.systems.push(Box::new(system));
         self
+    }
+
+    pub fn system<I, A, S: System<T> + 'static, M: IntoSystem<T, I, A, System = S> + 'static>(
+        &mut self,
+        system: M,
+    ) -> &mut Self {
+        self.non_auto_system(system.into_system())
     }
 
     pub fn systems<I, A>(&mut self, systems: impl IntoSystemSet<T, I, A>) -> &mut Self {
@@ -64,11 +72,10 @@ impl<T> Engine<T> {
         self
     }
 
-    pub fn update(&mut self) -> SystemResult<T> {
+    pub fn update(&mut self) {
         for system in &mut self.systems {
-            system.call(&mut self.storage)?;
+            system.call(&mut self.storage);
         }
-        Ok(())
     }
 }
 
@@ -95,17 +102,17 @@ impl EntityStateStorage {
         self
     }
 
-    pub fn get_state<'a, T>(&'a self) -> Res<'a, T> {
+    pub fn get_state<T>(&self) -> Res<T> {
         Res::retrieve(self)
     }
-    pub fn get_state_mut<'a, T>(&'a self) -> ResMut<'a, T> {
+    pub fn get_state_mut<T>(&self) -> ResMut<T> {
         ResMut::retrieve(self)
     }
 
-    pub fn query<'a, T>(&'a self) -> Query<'a, T> {
+    pub fn query<T>(&self) -> Query<T> {
         Query::retrieve(self)
     }
-    pub fn query_mut<'a, T>(&'a self) -> QueryMut<'a, T> {
+    pub fn query_mut<T>(&self) -> QueryMut<T> {
         QueryMut::retrieve(self)
     }
 }

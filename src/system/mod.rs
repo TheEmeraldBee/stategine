@@ -5,8 +5,8 @@ pub mod into_system;
 pub mod into_system_set;
 pub mod param;
 
-pub type SystemResult<T> = Result<(), T>;
+pub mod conditional_system_set;
 
 pub trait System<T> {
-    fn call(&mut self, storage: &mut EntityStateStorage) -> SystemResult<T>;
+    fn call(&mut self, storage: &mut EntityStateStorage) -> T;
 }

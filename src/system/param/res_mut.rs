@@ -29,7 +29,7 @@ impl<T: 'static> DerefMut for ResMut<'_, T> {
     }
 }
 
-impl<'a, T: 'static> SystemParam for ResMut<'a, T> {
+impl<T: 'static> SystemParam for ResMut<'_, T> {
     type Item<'new> = ResMut<'new, T>;
 
     fn retrieve(resources: &EntityStateStorage) -> Self::Item<'_> {

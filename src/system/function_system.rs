@@ -1,4 +1,4 @@
-use crate::system::{System, SystemResult, into_system::IntoSystem, param::SystemParam};
+use crate::system::{System, into_system::IntoSystem, param::SystemParam};
 
 use crate::EntityStateStorage;
 
@@ -15,18 +15,18 @@ macro_rules! impl_for_func {
         impl<T, Func, $($item),*> System<T> for FunctionSystem<T, ($($item,)*), Func>
         where
                 for<'a, 'b> &'a mut Func:
-                    FnMut( $($item),* ) -> SystemResult<T> +
-                    FnMut( $(<$item as SystemParam>::Item<'b>),* ) -> SystemResult<T>,
+                    FnMut( $($item),* ) -> T +
+                    FnMut( $(<$item as SystemParam>::Item<'b>),* ) -> T,
             $($item: SystemParam + 'static),*
         {
             #[inline]
             #[allow(non_snake_case, unused_variables)]
-            fn call(&mut self, storage: &mut EntityStateStorage) -> SystemResult<T> {
+            fn call(&mut self, storage: &mut EntityStateStorage) -> T {
                 #[allow(clippy::too_many_arguments)]
                 fn call_inner<T, $($item),*>(
-                    mut f: impl FnMut($($item),*) -> SystemResult<T>,
+                    mut f: impl FnMut($($item),*) -> T,
                     $($item: $item,)*
-                ) -> SystemResult<T> {
+                ) -> T {
                     f($($item),*)
                 }
 
@@ -59,15 +59,15 @@ macro_rules! impl_into_system {
         impl<T, Func, $($item),*> IntoSystem<T, ($($item,)*), ()> for Func
                 where
                 for<'a, 'b> &'a mut Func:
-                    FnMut( $($item),* ) -> SystemResult<T> +
-                    FnMut( $(<$item as SystemParam>::Item<'b>),* ) -> SystemResult<T>,
+                    FnMut( $($item),* ) -> T +
+                    FnMut( $(<$item as SystemParam>::Item<'b>),* ) -> T,
             $($item: SystemParam + 'static),*
 
         {
             type System = FunctionSystem<T, ($($item,)*), Self>;
             #[inline]
             #[allow(non_snake_case, unused_variables)]
-            fn into_widget(self) -> Self::System {
+            fn into_system(self) -> Self::System {
                 FunctionSystem {
                     f: self,
                     marker: Default::default(),

@@ -16,14 +16,14 @@ pub struct Res<'a, T: 'static> {
     _marker: PhantomData<&'a T>,
 }
 
-impl<'a, T: 'static> Deref for Res<'a, T> {
+impl<T: 'static> Deref for Res<'_, T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         self.value.downcast_ref().unwrap()
     }
 }
 
-impl<'a, T: 'static> SystemParam for Res<'a, T> {
+impl<T: 'static> SystemParam for Res<'_, T> {
     type Item<'new> = Res<'new, T>;
     fn retrieve(resources: &EntityStateStorage) -> Self::Item<'_> {
         Res {

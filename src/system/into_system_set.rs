@@ -14,7 +14,7 @@ macro_rules! impl_into_system_set {
         {
             fn into_widget_set(self) -> Vec<Box<dyn for<'a> System<T>>> {
                 vec![
-                    $(Box::new(self.$num.into_widget())),*
+                    $(Box::new(self.$num.into_system())),*
                 ]
             }
         }

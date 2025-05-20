@@ -1,34 +1,27 @@
 use std::{thread::sleep, time::Duration};
 
-use stategine::{
-    Engine,
-    system::{
-        SystemResult,
-        into_system::IntoSystem,
-        param::{query_mut::QueryMut, res::Res, res_mut::ResMut},
-    },
-};
+use stategine::prelude::*;
 
 struct RunningCounter(i32);
 
-fn render(running_state: Res<RunningCounter>) -> SystemResult<()> {
-    if running_state.0 % 2 == 0 {
-        println!("Time Remaining: {}", running_state.0 / 2);
-    }
-    Ok(())
+fn render_check(cntr: Res<RunningCounter>) -> bool {
+    cntr.0 % 2 == 0
+}
+fn render(running_state: Res<RunningCounter>) {
+    println!("Time Remaining: {}", running_state.0 / 2);
 }
 
-fn change_state(mut running_state: ResMut<RunningCounter>) -> SystemResult<()> {
+fn change_state(mut running_state: ResMut<RunningCounter>) {
     sleep(Duration::from_millis(500));
 
     running_state.0 -= 1;
-    Ok(())
 }
 
 fn main() {
     let mut engine = Engine::new();
-    engine.systems((render, change_state));
+    engine.system(change_state);
     engine.state(RunningCounter(8));
+    engine.non_auto_system(ConditionalSystemSet::new(render_check, (render,)));
 
     engine.entity(5).entity(10);
 
@@ -39,6 +32,6 @@ fn main() {
         }
         drop(running);
 
-        engine.update().unwrap();
+        engine.update();
     }
 }

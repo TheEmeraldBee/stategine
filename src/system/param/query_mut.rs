@@ -15,7 +15,7 @@ pub struct QueryMut<'a, T: 'static> {
 }
 
 impl<'a, T: 'static> QueryMut<'a, T> {
-    pub fn get_mut<'b>(&'b mut self, idx: usize) -> Option<&'b mut T> {
+    pub fn get_mut(&mut self, idx: usize) -> Option<&mut T> {
         self.value.get_mut(idx).map(|x| x.downcast_mut().unwrap())
     }
 
@@ -44,7 +44,7 @@ pub struct QueryMutIter<'a, 'b, T: 'static> {
     item: usize,
 }
 
-impl<'a, 'b, T: 'static> Iterator for QueryMutIter<'a, 'b, T> {
+impl<'b, T: 'static> Iterator for QueryMutIter<'_, 'b, T> {
     type Item = &'b mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -70,7 +70,7 @@ impl<'a, 'b, T: 'static> Iterator for QueryMutIter<'a, 'b, T> {
     }
 }
 
-impl<'a, T: 'static> SystemParam for QueryMut<'_, T> {
+impl<T: 'static> SystemParam for QueryMut<'_, T> {
     type Item<'new> = QueryMut<'new, T>;
 
     fn retrieve(resources: &EntityStateStorage) -> Self::Item<'_> {
