@@ -1,0 +1,8 @@
+[package]
+name = "stategine"
+version = "0.1.0"
+edition = "2024"
+description = "An application engine for handling function systems that run based on states and conditions"
+
+[dependencies]
+downcast-rs = "2.0.1"
