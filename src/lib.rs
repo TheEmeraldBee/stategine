@@ -64,6 +64,11 @@ impl Engine {
         for system in &mut self.systems {
             system.call(&mut self.storage);
         }
+
+        // Apply all commands
+        let commands = self.take_state::<Commands>();
+        commands.apply_all(self);
+        self.state(Commands::default());
     }
 }
 
@@ -113,6 +118,16 @@ impl EntityStateStorage {
     }
     pub fn get_state_mut<T>(&self) -> ResMut<T> {
         ResMut::retrieve(self)
+    }
+
+    pub fn take_state<T: 'static>(&mut self) -> T {
+        *self
+            .states
+            .remove(&TypeId::of::<T>())
+            .expect("State should exist")
+            .into_inner()
+            .downcast()
+            .unwrap()
     }
 
     pub fn query<T>(&self) -> Query<T> {

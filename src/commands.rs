@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::Engine;
 
 pub trait Command {
-    fn apply(self, engine: &mut Engine);
+    fn apply(self: Box<Self>, engine: &mut Engine);
 }
 
 pub enum EntityCommand<T: 'static> {
@@ -14,8 +14,8 @@ pub enum EntityCommand<T: 'static> {
 }
 
 impl<T> Command for EntityCommand<T> {
-    fn apply(self, engine: &mut Engine) {
-        match self {
+    fn apply(self: Box<Self>, engine: &mut Engine) {
+        match *self {
             Self::Add(e) => engine.entity(e),
             Self::Remove(d) => engine.remove_entity(d),
         };
@@ -38,5 +38,9 @@ impl Commands {
 
     pub fn remove_entity(&mut self, uuid: Uuid) {
         self.add(EntityCommand::Remove::<()>(uuid))
+    }
+
+    pub fn apply_all(self, engine: &mut Engine) {
+        self.events.into_iter().for_each(|x| x.apply(engine));
     }
 }
