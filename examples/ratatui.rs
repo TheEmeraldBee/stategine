@@ -18,7 +18,7 @@ fn ui(mut terminal: ResMut<Terminal>, lines: Query<String>) {
         .draw(|f| {
             for (i, line) in lines.iter().enumerate() {
                 let rect = Rect::new(0, i as u16, f.area().width, 1);
-                f.render_widget(Paragraph::new(line.as_str()), rect);
+                f.render_widget(Paragraph::new(line.1.as_str()), rect);
             }
         })
         .unwrap();

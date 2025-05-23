@@ -1,0 +1,42 @@
+use std::any::Any;
+
+use uuid::Uuid;
+
+use crate::Engine;
+
+pub trait Event {
+    fn apply(self, engine: &mut Engine);
+}
+
+pub enum EntityCommand<T: 'static> {
+    Add(T),
+    Remove(Uuid),
+}
+
+impl<T> Event for EntityCommand<T> {
+    fn apply(self, engine: &mut Engine) {
+        match self {
+            Self::Add(e) => engine.entity(e),
+            Self::Remove(d) => engine.remove_entity(d),
+        };
+    }
+}
+
+#[derive(Default)]
+pub struct Commands {
+    events: Vec<Box<dyn Event>>,
+}
+
+impl Commands {
+    pub fn add(&mut self, event: impl Event + 'static) {
+        self.events.push(Box::new(event))
+    }
+
+    pub fn entity<T: Any + 'static>(&mut self, e: T) {
+        self.add(EntityCommand::Add(e));
+    }
+
+    pub fn remove_entity(&mut self, uuid: Uuid) {
+        self.add(EntityCommand::Remove::<()>(uuid))
+    }
+}

@@ -5,18 +5,22 @@ use std::{
     cell::Ref,
 };
 
+use uuid::Uuid;
+
 use crate::EntityStateStorage;
 
 use super::SystemParam;
 
 pub struct Query<'a, T: 'static> {
-    value: Vec<Ref<'a, Box<dyn Any>>>,
+    value: Vec<(uuid::Uuid, Ref<'a, Box<dyn Any>>)>,
     _marker: PhantomData<&'a T>,
 }
 
 impl<'a, T: 'static> Query<'a, T> {
-    pub fn get(&self, idx: usize) -> Option<&T> {
-        self.value.get(idx).map(|x| x.downcast_ref().unwrap())
+    pub fn get(&self, idx: usize) -> Option<(uuid::Uuid, &T)> {
+        self.value
+            .get(idx)
+            .map(|x| (x.0, x.1.downcast_ref().unwrap()))
     }
 
     pub fn iter<'b>(&'b self) -> QueryIter<'a, 'b, T> {
@@ -33,7 +37,7 @@ pub struct QueryIter<'a, 'b, T: 'static> {
 }
 
 impl<'b, T: 'static> Iterator for QueryIter<'_, 'b, T> {
-    type Item = &'b T;
+    type Item = (Uuid, &'b T);
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.query.get(self.item);
         self.item += 1;
@@ -50,21 +54,9 @@ impl<T: 'static> SystemParam for Query<'_, T> {
                 .entities
                 .iter()
                 .filter(|x| x.0 == TypeId::of::<T>())
-                .map(|x| x.1.borrow())
+                .map(|x| (x.1, x.2.borrow()))
                 .collect::<Vec<_>>(),
             _marker: PhantomData,
-        }
-    }
-}
-
-impl<'a, T: 'static> IntoIterator for &'a Query<'a, T> {
-    type Item = &'a T;
-    type IntoIter = QueryIter<'a, 'a, T>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        QueryIter {
-            query: self,
-            item: 0,
         }
     }
 }
@@ -81,7 +73,7 @@ mod test {
         storage.entity(12).entity(5).entity(12);
 
         let query = Query::<'_, i32>::retrieve(&storage);
-        let res = query.iter().map(|x| *x).collect::<Vec<_>>();
+        let res = query.iter().map(|x| *x.1).collect::<Vec<_>>();
         assert_eq!(res, vec![12, 5, 12]);
     }
 }
