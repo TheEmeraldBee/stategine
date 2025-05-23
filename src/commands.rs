@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::Engine;
 
-pub trait Event {
+pub trait Command {
     fn apply(self, engine: &mut Engine);
 }
 
@@ -13,7 +13,7 @@ pub enum EntityCommand<T: 'static> {
     Remove(Uuid),
 }
 
-impl<T> Event for EntityCommand<T> {
+impl<T> Command for EntityCommand<T> {
     fn apply(self, engine: &mut Engine) {
         match self {
             Self::Add(e) => engine.entity(e),
@@ -24,11 +24,11 @@ impl<T> Event for EntityCommand<T> {
 
 #[derive(Default)]
 pub struct Commands {
-    events: Vec<Box<dyn Event>>,
+    events: Vec<Box<dyn Command>>,
 }
 
 impl Commands {
-    pub fn add(&mut self, event: impl Event + 'static) {
+    pub fn add(&mut self, event: impl Command + 'static) {
         self.events.push(Box::new(event))
     }
 

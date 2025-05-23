@@ -78,7 +78,7 @@ impl Default for EntityStateStorage {
             entities: Vec::new(),
             states: HashMap::new(),
         };
-        res.states((Commands::default(),))
+        res.states((Commands::default(),));
         res
     }
 }
