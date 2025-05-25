@@ -70,7 +70,7 @@ mod test {
     #[test]
     fn test_query() {
         let mut storage = EntityStateStorage::default();
-        storage.entity(12).entity(5).entity(12);
+        storage.entities([12, 5, 12]);
 
         let query = Query::<'_, i32>::retrieve(&storage);
         let res = query.iter().map(|x| *x.1).collect::<Vec<_>>();

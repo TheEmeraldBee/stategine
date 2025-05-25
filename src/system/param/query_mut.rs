@@ -88,7 +88,7 @@ mod test {
     #[test]
     fn test_query_mut() {
         let mut storage = EntityStateStorage::default();
-        storage.entity(12).entity(5).entity(12);
+        storage.entities([12, 5, 12]);
 
         let mut query = QueryMut::<i32>::retrieve(&storage);
         query.iter_mut().for_each(|x| *x.1 += 5);

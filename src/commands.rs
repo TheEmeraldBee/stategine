@@ -9,15 +9,17 @@ pub trait Command {
 }
 
 pub enum EntityCommand<T: 'static> {
-    Add(T),
+    Add(Uuid, T),
     Remove(Uuid),
 }
 
 impl<T> Command for EntityCommand<T> {
     fn apply(self: Box<Self>, engine: &mut Engine) {
         match *self {
-            Self::Add(e) => engine.entity(e),
-            Self::Remove(d) => engine.remove_entity(d),
+            Self::Add(uuid, e) => engine.entity_uuid(uuid, e),
+            Self::Remove(d) => {
+                engine.remove_entity(d);
+            }
         };
     }
 }
@@ -32,8 +34,10 @@ impl Commands {
         self.events.push(Box::new(event))
     }
 
-    pub fn entity<T: Any + 'static>(&mut self, e: T) {
-        self.add(EntityCommand::Add(e));
+    pub fn entity<T: Any + 'static>(&mut self, e: T) -> Uuid {
+        let uuid = Uuid::new_v4();
+        self.add(EntityCommand::Add(uuid, e));
+        uuid
     }
 
     pub fn remove_entity(&mut self, uuid: Uuid) {

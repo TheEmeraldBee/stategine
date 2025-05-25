@@ -23,7 +23,7 @@ fn main() {
     engine.system(ConditionalSystemSet::new(render_check, (render,)));
     engine.systems((change_state,));
 
-    engine.entity(5).entity(10);
+    engine.entities([5, 10]);
 
     loop {
         let running = engine.get_state::<RunningCounter>();

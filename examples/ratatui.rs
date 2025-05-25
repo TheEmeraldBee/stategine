@@ -40,11 +40,12 @@ fn main() {
 
     let mut engine = Engine::new();
     engine.states((term, Running(true)));
-    engine
-        .entity("A: This is ratatui!".to_string())
-        .entity("B: But running with stategine".to_string())
-        .entity("C: Making it less complicated!".to_string())
-        .entity("Press `q` to quit".to_string());
+    engine.entities([
+        "A: This is ratatui!".to_string(),
+        "B: But running with stategine".to_string(),
+        "C: Making it less complicated!".to_string(),
+        "Press `q` to quit".to_string(),
+    ]);
     engine.systems((ui, exit_condition));
 
     while engine.get_state::<Running>().0 {

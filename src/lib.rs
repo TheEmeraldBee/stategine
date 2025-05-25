@@ -89,13 +89,21 @@ impl Default for EntityStateStorage {
 }
 
 impl EntityStateStorage {
-    pub fn entity<T: Any + 'static>(&mut self, entity: T) -> &mut Self {
-        self.entities.push((
-            TypeId::of::<T>(),
-            Uuid::new_v4(),
-            RefCell::new(Box::new(entity)),
-        ));
-        self
+    pub fn entity<T: Any + 'static>(&mut self, entity: T) -> Uuid {
+        let uuid = Uuid::new_v4();
+        self.entity_uuid(uuid, entity);
+        uuid
+    }
+
+    pub fn entity_uuid<T: Any + 'static>(&mut self, uuid: Uuid, entity: T) {
+        self.entities
+            .push((TypeId::of::<T>(), uuid, RefCell::new(Box::new(entity))));
+    }
+
+    pub fn entities<T: Any + 'static>(&mut self, entities: impl IntoIterator<Item = T>) {
+        for entity in entities.into_iter() {
+            self.entity(entity);
+        }
     }
 
     pub fn remove_entity(&mut self, uuid: Uuid) -> &mut Self {
