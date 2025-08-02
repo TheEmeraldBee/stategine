@@ -67,8 +67,8 @@ impl Engine {
 
         // Apply all commands
         let commands = self.take_state::<Commands>();
-        commands.apply_all(self);
         self.state(Commands::default());
+        commands.apply_all(self);
     }
 }
 
